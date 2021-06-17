@@ -1,0 +1,82 @@
+pipeline {
+    agent {
+        label 'test_jenkins_slave'
+    }
+environment{
+    jmeterPath = 'C:\\SS\\jmeter\\bin\\'
+    
+}
+
+parameters {
+  string defaultValue: '0', description: 'TS1-Baseline test threads', name: 'B1_THREADS'
+  string defaultValue: '0', description: 'TS2-Baseline test threads', name: 'B2_THREADS'
+  string defaultValue: '0', description: 'TS2-Load test threads', name: 'L2_THREADS'
+  string defaultValue: '0', description: 'TS4-Baseline test threads', name: 'B4_THREADS'
+  string defaultValue: '1', description: 'Rampup', name: 'RAMPUP1'
+  string defaultValue: '1', description: 'Rampup', name: 'RAMPUP2'
+  string defaultValue: '1', description: 'Rampup', name: 'RAMPUP3'
+  string defaultValue: '1', description: 'Loops', name: 'LOOP1'
+  string defaultValue: '1', description: 'Loops', name: 'LOOP2'
+  string defaultValue: '1', description: 'Loops', name: 'LOOP3'
+  string defaultValue: '60', description: 'Duration', name: 'DURATION'
+  choice choices: ['BaselineTest', 'LoadTest', 'SoakTest'], description: 'Test Types that are executed', name: 'Environment_TestType'
+  choice choices: ['Windows', 'Linux'], description: 'Type of OS', name: 'OC_Type'
+    
+}
+options {
+ 	disableConcurrentBuilds()
+ 	// only keep 5 builds to prevent disk usage from growing out of control
+  buildDiscarder(
+    logRotator(
+      artifactDaysToKeepStr: '', 
+      artifactNumToKeepStr: '', 
+      daysToKeepStr: '', 
+      numToKeepStr: '5',
+    ),
+  )
+ 	}
+
+    stages {
+        stage ('Clear_exrep_folder') {
+           steps {
+               build job: 'Clear_exrep'
+            }
+        }
+        
+      stage('Run JMeter Test') {
+            steps {
+                 echo 'Go to jmeter folder'
+                 dir("${jmeterPath}"){
+                    println('Run jmeter script')
+                    bat "md %WORKSPACE%\\%BUILD_NUMBER%\\ExecutionReport"
+                    bat 'jmeter.bat -JB1_threads=%B1_THREADS% -JB2_threads=%B2_THREADS% -JLs2_threads=%L2_THREADS% -JB4_threads=%B4_THREADS% -Jrampup1=%RAMPUP1% -Jrampup2=%RAMPUP2% -Jrampup3=%RAMPUP3% -Jloop1=%LOOP1% -Jloop2=%LOOP2% -Jloop3=%LOOP3% -Jduration=%DURATION%  -n -t "Jenkinsjmx\\TestScript.jmx\" -l "%WORKSPACE%\\%BUILD_NUMBER%\\Report\\%BUILD_NUMBER%.csv" -e -o "%WORKSPACE%\\%BUILD_NUMBER%\\ExecutionReport"'
+                 
+                     
+                 }
+            }
+        }
+        
+    }
+    
+post {
+        success {
+            perfReport '${BUILD_NUMBER}\\Report\\${BUILD_NUMBER}.csv'
+        // Archive the built artifacts
+            archiveArtifacts artifacts: "${BUILD_NUMBER}\\Report\\*.csv, ${BUILD_NUMBER}\\ExecutionReport\\index.html"
+            archiveArtifacts artifacts: 'exrep\\**\\*.csv'
+          // publish html
+            publishHTML target: [
+              allowMissing: true,
+              alwaysLinkToLastBuild: true,
+              keepAll: true,
+              reportDir: '${BUILD_NUMBER}\\ExecutionReport\\',
+              reportFiles: 'index.html',
+              reportName: 'RCov Report'
+            ]
+            emailext body: 'Test Message',
+            subject: 'Test Subject',
+            to: 'inkognita.serghey@gmail.com'
+            }
+}
+
+}
