@@ -41,9 +41,9 @@ options {
                 checkout scm
                 // checkout([$class: 'GitSCM', branches: [[name: '*/main']],
     // userRemoteConfigs: [[url: 'https://github.com/Gal1af/JMT.git']]])
-                dir('JMT'){
-                git credentialsId: 'GITID', url: "https://github.com/Gal1af/JMT.git", branch: 'main'
-                }
+               // dir('JMT'){
+               // git credentialsId: 'GITID', url: "https://github.com/Gal1af/JMT.git", branch: 'main'
+               // }
                  echo 'Go to jmeter folder'
                  dir(jmeterPath){
                     echo 'Run jmeter script'
