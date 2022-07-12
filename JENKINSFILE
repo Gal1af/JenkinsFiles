@@ -46,7 +46,7 @@ options {
                  dir(jmeterPath){
                     echo 'Run jmeter script'
                     sh "mkdir -p ${WORKSPACE}/${BUILD_NUMBER}/ExecutionReport"
-                    sh """java -jar ApacheJMeter.jar -JB1_threads=${B1_THREADS} -JB2_threads=${B2_THREADS} -JLs2_threads=${L2_THREADS} -JB4_threads=${B4_THREADS} -Jrampup=${RAMPUP} -Jloop=${LOOP} -Jduration=${DURATION} -n -r -t TestScript.jmx -l "${WORKSPACE}/${BUILD_NUMBER}/Report/${BUILD_NUMBER}.csv" -e -o "${WORKSPACE}/${BUILD_NUMBER}/ExecutionReport" """
+                    sh """java -jar ApacheJMeter.jar -JB1_threads=${B1_THREADS} -JB2_threads=${B2_THREADS} -JLs2_threads=${L2_THREADS} -JB4_threads=${B4_THREADS} -Jrampup=${RAMPUP} -Jloop=${LOOP} -Jduration=${DURATION} -n -r -t TestScript.jmx -l "${WORKSPACE}/${BUILD_NUMBER}/Report/${BUILD_NUMBER}.jtl" -e -o "${WORKSPACE}/${BUILD_NUMBER}/ExecutionReport" """
                    // java -jar ApacheJMeter.jar -JB1_threads=${B1_THREADS} -JB2_threads=${B2_THREADS} -JLs2_threads=${L2_THREADS} -JB4_threads=${B4_THREADS} -Jrampup=${RAMPUP} -Jloop=${LOOP} -Jduration=${DURATION}  -n -t "TestScript.jmx" -l "${WORKSPACE}/${BUILD_NUMBER}/Report/${BUILD_NUMBER}.csv" -e -o "${WORKSPACE}/${BUILD_NUMBER}/ExecutionReport" """
                  }
             }
